@@ -1,0 +1,4 @@
+{% set export_lang = filters.lang if filters is defined else '' %}
+{% set export_activity = filters.activity if filters is defined else '' %}
+<a id="export-md" href="/export?format=md{% if export_lang %}&lang={{ export_lang }}{% endif %}{% if export_activity %}&activity={{ export_activity }}{% endif %}"{% if oob|default(false) %} hx-swap-oob="true"{% endif %}>{{ t("export_md", lang) }}</a>
+<a id="export-csv" href="/export?format=csv{% if export_lang %}&lang={{ export_lang }}{% endif %}{% if export_activity %}&activity={{ export_activity }}{% endif %}"{% if oob|default(false) %} hx-swap-oob="true"{% endif %}>{{ t("export_csv", lang) }}</a>

@@ -1,0 +1,10 @@
+<div id="status-block" class="status-block">
+  <form hx-post="/channels/{{ channel.id }}/status" hx-target="#status-block" hx-swap="outerHTML">
+    <select name="status" aria-label="{{ t('status', lang) }}">
+      {% for value in statuses %}
+        <option value="{{ value }}" {{ 'selected' if channel.status == value else '' }}>{{ label("status", value, lang) }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn ghost" type="submit">{{ t("save_status", lang) }}</button>
+  </form>
+</div>

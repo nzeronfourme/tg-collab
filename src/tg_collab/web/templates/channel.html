@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}@{{ channel.username }} · tg-collab{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/">← {{ t("back", lang) }}</a></div>
+
+<section class="card channel-hero">
+  <div class="hero-head">
+    <div class="hero-identity">
+      <h1>{{ channel.title or ("@" + channel.username) }}</h1>
+      <p class="hero-meta">
+        <a class="channel-link" href="https://t.me/{{ channel.username }}">@{{ channel.username }}</a>
+        <span class="sep">·</span>
+        <span>{{ label("source", row.source, lang) }}</span>
+        <span class="sep">·</span>
+        <span>{{ label("tab", row.tab, lang) }}</span>
+      </p>
+    </div>
+    <div class="hero-actions">
+      {% include "_status_badge.html" %}
+      <form hx-post="/channels/{{ channel.id }}/generate" hx-target="#job-panel" hx-swap="innerHTML">
+        <button class="btn" type="submit">{{ t("generate_draft", lang) }}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="stats-row hero-stats">
+    <div class="stat"><span class="stat-label">{{ t("col_subscribers", lang) }}</span><b>{{ channel.subscribers if channel.subscribers is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("avg_views", lang) }}</span><b>{{ channel.avg_views if channel.avg_views is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("median_views", lang) }}</span><b>{{ channel.median_views if channel.median_views is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">ERR</span><b>{{ "%.3f"|format(channel.err) if channel.err is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("col_similarity", lang) }}</span><b>{{ row.similarity if row.similarity is not none else "—" }}</b></div>
+  </div>
+
+  <dl class="fact-grid">
+    <div class="fact">
+      <dt class="section-label">{{ t("range", lang) }}</dt>
+      <dd>{{ label("range", row.range_reason, lang) }} · {{ t("size_fit", lang) }} {{ row.size_fit if row.size_fit is not none else "—" }}</dd>
+    </div>
+    <div class="fact">
+      <dt class="section-label">{{ t("col_topics", lang) }}</dt>
+      <dd>{% for term in row.matched_topics %}<span class="flag topic">{{ term }}</span>{% else %}<span class="muted">—</span>{% endfor %}</dd>
+    </div>
+    <div class="fact">
+      <dt class="section-label">{{ t("flags", lang) }}</dt>
+      <dd>{% for flag in row.flags %}<span class="flag">{{ label("flag", flag, lang) }}</span>{% else %}<span class="muted">—</span>{% endfor %}</dd>
+    </div>
+    <div class="fact">
+      <dt class="section-label">{{ t("contact", lang) }}</dt>
+      <dd><span class="badge contact" title="{{ label('contact_hint', channel.contact_status, lang) }}">{{ label("contact", channel.contact_status, lang) }}</span>
+        {% if channel.contact_value %}<span class="muted">{{ channel.contact_value }}</span>{% endif %}</dd>
+      {% if contact_candidates %}
+        <dd class="muted"><span class="section-label">{{ t("contact_candidates", lang) }}</span>{{ contact_candidates|join(", ") }}</dd>
+      {% endif %}
+    </div>
+  </dl>
+</section>
+
+<div id="job-panel"></div>
+
+<div class="detail-grid">
+  <section class="card">
+    <h2>{{ t("description", lang) }}</h2>
+    <div class="card-scroll">
+      <p class="post-text">{{ channel.description or "—" }}</p>
+      {% if tgstat %}
+        <h3 class="card-block">{{ t("tgstat", lang) }}</h3>
+        <div class="stats-row">
+          {% for key, value in tgstat.items() %}
+            <div class="stat"><span class="stat-label">{{ key }}</span><b>{{ value }}</b></div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if plugin %}
+        <h3 class="card-block">{{ t("plugin_context", lang) }}</h3>
+        <p class="section-label">{{ t("repo", lang) }}</p>
+        <p>{{ plugin.repo or "—" }}</p>
+        {% if plugin.stars is not none %}
+          <p class="section-label">{{ t("stars", lang) }}</p>
+          <p>{{ plugin.stars }}</p>
+        {% endif %}
+        {% if plugin.description %}<p class="muted">{{ plugin.description }}</p>{% endif %}
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>{{ t("last_posts", lang) }}</h2>
+    <div class="card-scroll">
+      {% for post in posts %}
+        <article class="post">
+          <div class="post-meta">#{{ post.message_id }} · {{ post.posted_at }} · {{ post.views if post.views is not none else "—" }}</div>
+          <div class="post-text">{{ post.text or "—" }}</div>
+        </article>
+      {% else %}
+        <p class="muted">{{ t("no_posts", lang) }}</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<div class="work-grid">
+  <section class="card">
+    <h2>{{ t("notes", lang) }}</h2>
+    <div id="notes-block" class="panel-body">{% include "_notes_block.html" %}</div>
+  </section>
+
+  <section class="card">
+    <h2>{{ t("draft", lang) }}</h2>
+    <div id="draft-block" class="panel-body">{% include "_draft_block.html" %}</div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% if rows %}
+<div class="table-wrap">
+  <table class="channels">
+    <colgroup>
+      <col style="width: 44px">
+      <col>
+      <col style="width: 100px">
+      <col style="width: 100px">
+      <col style="width: 120px">
+      <col style="width: 120px">
+      <col style="width: 140px">
+      <col style="width: 150px">
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col"><span class="sr-only">{{ t("generate_drafts", lang) }}</span></th>
+        <th scope="col">{{ t("col_channel", lang) }}</th>
+        <th scope="col" class="num">{{ t("col_subscribers", lang) }}</th>
+        <th scope="col" class="num">{{ t("col_views", lang) }}</th>
+        <th scope="col" class="num">{{ t("col_similarity", lang) }}</th>
+        <th scope="col">{{ t("col_status", lang) }}</th>
+        <th scope="col">{{ t("col_contact", lang) }}</th>
+        <th scope="col">{{ t("col_flags", lang) }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="check-cell"><input type="checkbox" name="ids" value="{{ row.id }}" form="batch-form" aria-label="@{{ row.username }}"></td>
+        <td class="cell-channel" data-label="{{ t('col_channel', lang) }}">
+          <a class="channel-link" href="/channels/{{ row.id }}">@{{ row.username }}</a>
+          {% if row.title %}<div class="channel-title">{{ row.title }}</div>{% endif %}
+          {% for term in row.matched_topics %}<span class="flag topic">{{ term }}</span>{% endfor %}
+        </td>
+        <td class="num" data-label="{{ t('col_subscribers', lang) }}">{{ row.subscribers if row.subscribers is not none else "—" }}</td>
+        <td class="num" data-label="{{ t('col_views', lang) }}">{{ row.avg_views if row.avg_views is not none else "—" }}</td>
+        <td class="num" data-label="{{ t('col_similarity', lang) }}">
+          <div class="cell-metric">
+            <span class="value">{{ "%g"|format(row.similarity) if row.similarity is not none else "—" }}</span>
+            {% if row.similarity is not none %}<span class="meter" style="--value: {{ row.similarity }}"><i></i></span>{% endif %}
+          </div>
+        </td>
+        <td class="cell-status" data-label="{{ t('col_status', lang) }}">
+          <span class="badge status-{{ row.status }}">{{ label("status", row.status, lang) }}</span>
+        </td>
+        <td class="cell-contact" data-label="{{ t('col_contact', lang) }}">
+          {% if row.contact_status %}
+            <span class="badge contact" title="{{ label('contact_hint', row.contact_status, lang) }}">{{ label("contact", row.contact_status, lang) }}</span>
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+        <td class="cell-flags" data-label="{{ t('col_flags', lang) }}">
+          {% for flag in row.flags %}
+            <span class="flag">{{ label("flag", flag, lang) }}</span>
+          {% endfor %}
+          {% if row.activity == "unknown" %}
+            <span class="muted">{{ t("activity_unknown", lang) }}</span>
+          {% elif not row.flags %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif channels %}
+<div class="empty">
+  <p>{{ t("no_channels", lang) }}</p>
+  <div class="toolbar">
+    <a class="btn ghost sm" href="/?tab={{ active_tab|default('suitable') }}">{{ t("clear_filters", lang) }}</a>
+  </div>
+</div>
+{% endif %}

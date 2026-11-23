@@ -1,0 +1,10 @@
+{% if not draft_text %}
+  <p class="muted">{{ t("no_draft", lang) }}</p>
+{% endif %}
+<form hx-post="/channels/{{ channel_id }}/draft" hx-target="#draft-block" hx-swap="innerHTML">
+  <textarea id="draft-text" name="text" rows="9">{{ draft_text }}</textarea>
+  <div class="toolbar">
+    <button type="button" class="btn ghost sm" data-copy-target="draft-text">{{ t("copy", lang) }}</button>
+    <button class="btn ghost sm" type="submit">{{ t("save_draft", lang) }}</button>
+  </div>
+</form>

@@ -1,0 +1,2 @@
+{% for name in ("suitable", "work", "growing", "hidden") %}<span id="tab-count-{{ name }}" class="tab-count"{% if oob|default(false) %} hx-swap-oob="true"{% endif %}>{{ counts[name]|default(0) }}</span>
+{% endfor %}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t("app_name", lang) }}{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="nav">
+    <a class="logo" href="/">tg-collab</a>
+    <nav class="tabs" aria-label="{{ t('nav_sections', lang) }}">
+      <a href="/?tab=suitable" class="{{ 'active' if active_tab|default('') == 'suitable' else '' }}"
+         {% if active_tab|default('') == 'suitable' %}aria-current="page"{% endif %}>{{ t("nav_suitable", lang) }} <span id="tab-count-suitable" class="tab-count">{{ counts.suitable|default(0) }}</span></a>
+      <a href="/?tab=work" class="{{ 'active' if active_tab|default('') == 'work' else '' }}"
+         {% if active_tab|default('') == 'work' %}aria-current="page"{% endif %}>{{ t("nav_work", lang) }} <span id="tab-count-work" class="tab-count">{{ counts.work|default(0) }}</span></a>
+      <a href="/?tab=growing" class="{{ 'active' if active_tab|default('') == 'growing' else '' }}"
+         title="{{ t('tab_growing_hint', lang) }}"
+         {% if active_tab|default('') == 'growing' %}aria-current="page"{% endif %}>{{ t("nav_growing", lang) }} <span id="tab-count-growing" class="tab-count">{{ counts.growing|default(0) }}</span></a>
+      <a href="/?tab=hidden" class="{{ 'active' if active_tab|default('') == 'hidden' else '' }}"
+         {% if active_tab|default('') == 'hidden' %}aria-current="page"{% endif %}>{{ t("nav_hidden", lang) }} <span id="tab-count-hidden" class="tab-count">{{ counts.hidden|default(0) }}</span></a>
+    </nav>
+    <div class="nav-actions">
+      {% if profiles and profiles|length > 1 %}
+      <form class="profile-switch" method="post" action="/profiles/use">
+        <input type="hidden" name="next" value="/">
+        <label class="sr-only" for="nav-profile">{{ t("profile_switch_label", lang) }}</label>
+        <select id="nav-profile" name="profile_id">
+          {% for item in profiles %}
+            <option value="{{ item.id }}" {% if item.id == active_profile_id %}selected{% endif %}>@{{ item.username }}{% if item.id == active_profile_id %} · {{ t("profiles_active", lang) }}{% endif %}</option>
+          {% endfor %}
+        </select>
+        <button class="btn ghost sm" type="submit">{{ t("profile_switch", lang) }}</button>
+      </form>
+      {% endif %}
+      <details class="support-menu" name="nav-menu">
+        <summary class="btn ghost sm" title="{{ t('support_project', lang) }}" aria-label="{{ t('support_project', lang) }}">♥</summary>
+        <div class="export-options">
+          <a href="https://t.me/github_raskopki" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a href="https://donatex.gg/donate/nzeronfourme" target="_blank" rel="noopener noreferrer">DonateX</a>
+          <a href="https://boosty.to/nzeronfourme/donate" target="_blank" rel="noopener noreferrer">Boosty</a>
+        </div>
+      </details>
+      <details class="export-menu" name="nav-menu">
+        <summary class="btn ghost sm">{{ t("export", lang) }}</summary>
+        <div class="export-options">
+          {% with oob = false %}{% include "_export_links.html" %}{% endwith %}
+        </div>
+      </details>
+      <a class="btn ghost sm" href="/settings">{{ t("nav_settings", lang) }}</a>
+      <a class="lang" href="/lang/en" title="English" {% if lang == 'en' %}aria-current="true"{% endif %}>EN</a>
+      <a class="lang" href="/lang/ru" title="Русский" {% if lang == 'ru' %}aria-current="true"{% endif %}>RU</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

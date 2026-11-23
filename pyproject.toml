@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tg-collab"
+version = "0.1.0"
+description = "Find peer Telegram channels, keep the outreach list in order, and draft personal intros - all on your machine."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "tg-collab contributors" }]
+keywords = [
+  "telegram",
+  "telegram-channels",
+  "channel-discovery",
+  "outreach",
+  "crm",
+  "local-first",
+  "cli",
+  "ai-agent",
+]
+classifiers = [
+  "Environment :: Console",
+  "Environment :: Web Environment",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Communications :: Chat",
+  "Topic :: Office/Business",
+]
+dependencies = [
+  "typer>=0.12",
+  "rich>=13.7",
+  "fastapi>=0.115",
+  "uvicorn>=0.30",
+  "jinja2>=3.1",
+  "httpx>=0.27",
+  "beautifulsoup4>=4.12",
+  "lxml>=5.0",
+  "python-multipart>=0.0.9",
+  "socksio>=1.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/nzeronfourme/tg-collab"
+Issues = "https://github.com/nzeronfourme/tg-collab/issues"
+
+[project.scripts]
+tg-collab = "tg_collab.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tg_collab"]
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+  "src",
+  "README.md",
+  "README.ru.md",
+  "SKILL.md",
+  "SKILL.ru.md",
+  "LICENSE",
+  "pyproject.toml",
+]

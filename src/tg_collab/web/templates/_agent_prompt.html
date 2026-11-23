@@ -1,0 +1,8 @@
+{% if prompt %}
+  <div class="toolbar">
+    <button type="button" class="btn ghost sm" data-copy-target="agent-prompt-text">{{ t("copy_prompt", lang) }}</button>
+  </div>
+  <pre class="prompt" id="agent-prompt-text">{{ prompt }}</pre>
+{% else %}
+  <p class="muted">{{ t("no_profile", lang) }}</p>
+{% endif %}

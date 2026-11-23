@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}{{ t("dashboard_title", lang) }} · tg-collab{% endblock %}
+{% block content %}
+{% set find_running = job and job.kind == "find" %}
+<section class="page-head">
+  <div>
+    <h1>{{ t("dashboard_title", lang) }}</h1>
+  </div>
+  {% if profile %}
+  <div class="toolbar">
+    <form hx-post="/jobs/find" hx-target="#job-panel" hx-swap="innerHTML">
+      <button class="btn" type="submit"{% if find_running %} disabled aria-disabled="true"{% endif %}>
+        {{ t("search_running", lang) if find_running else t("run_search", lang) }}
+      </button>
+    </form>
+  </div>
+  {% endif %}
+</section>
+
+{% if not profile %}
+  <section class="empty">
+    <p>{{ t("no_profile", lang) }}</p>
+    <div class="toolbar">
+      <form hx-post="/jobs/init" hx-target="#job-panel" hx-swap="innerHTML">
+        <button class="btn" type="submit">{{ t("load_profile", lang) }}</button>
+      </form>
+      <a class="btn ghost" href="/settings">{{ t("open_settings", lang) }}</a>
+    </div>
+  </section>
+{% elif not channels %}
+  <section class="empty">
+    <p>{{ t("empty_candidates", lang) }}</p>
+    <div class="toolbar">
+      <form hx-post="/jobs/find" hx-target="#job-panel" hx-swap="innerHTML">
+        <button class="btn" type="submit"{% if find_running %} disabled aria-disabled="true"{% endif %}>
+          {{ t("search_running", lang) if find_running else t("run_search", lang) }}
+        </button>
+      </form>
+    </div>
+  </section>
+{% endif %}
+
+{% if profile %}
+<section class="card profile">
+  <div class="profile-head">
+    <div>
+      <h2>@{{ profile.username }}</h2>
+      <p class="muted">{{ profile.title or "—" }}</p>
+    </div>
+    <form hx-post="/jobs/init" hx-target="#job-panel" hx-swap="innerHTML">
+      <button class="btn ghost sm" type="submit">{{ t("update_profile", lang) }}</button>
+    </form>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><span class="stat-label">{{ t("col_subscribers", lang) }}</span><b>{{ profile.subscribers if profile.subscribers is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("avg_views", lang) }}</span><b>{{ profile.avg_views if profile.avg_views is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("median_views", lang) }}</span><b>{{ profile.median_views if profile.median_views is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">ERR</span><b>{{ "%.3f"|format(profile.err) if profile.err is not none else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("range", lang) }}</span><b>{{ target.low if target else "—" }}–{{ target.high if target else "—" }}</b></div>
+    <div class="stat"><span class="stat-label">{{ t("updated", lang) }}</span><b class="stat-date">{{ profile.fetched_at[:10] if profile.fetched_at else "—" }}</b></div>
+  </div>
+  {% if niche_terms %}
+    <p class="topics-line tag-group" data-group="terms"><span class="stat-label">{{ t("niche_terms", lang) }}</span>
+      {% for term in niche_terms %}<span class="flag topic">{{ term }}</span>{% endfor %}
+    </p>
+  {% endif %}
+  {% if niche_hashtags %}
+    <p class="topics-line tag-group" data-group="hashtags"><span class="stat-label">{{ t("hashtags", lang) }}</span>
+      {% for tag in niche_hashtags %}<span class="flag topic">#{{ tag }}</span>{% endfor %}
+    </p>
+  {% endif %}
+  {% if niche_domains %}
+    <p class="topics-line tag-group" data-group="domains"><span class="stat-label">{{ t("link_domains", lang) }}</span>
+      {% for domain in niche_domains %}<span class="flag topic">{{ domain }}</span>{% endfor %}
+    </p>
+  {% endif %}
+  <details class="tag-editor"{% if niche_error %} open{% endif %}>
+    <summary>{{ t("niche_edit_tags", lang) }}</summary>
+    <form class="tag-editor-form" method="post" action="/profiles/niche">
+      <div class="field">
+        <label for="niche_edit_terms">{{ t("niche_terms", lang) }}</label>
+        <input type="text" id="niche_edit_terms" name="terms" value="{{ niche_form.terms }}">
+      </div>
+      <div class="field">
+        <label for="niche_edit_hashtags">{{ t("hashtags", lang) }}</label>
+        <input type="text" id="niche_edit_hashtags" name="hashtags" value="{{ niche_form.hashtags }}">
+      </div>
+      <div class="field">
+        <label for="niche_edit_domains">{{ t("link_domains", lang) }}</label>
+        <input type="text" id="niche_edit_domains" name="domains" value="{{ niche_form.domains }}">
+      </div>
+      <p class="hint">{{ t("niche_edit_hint", lang) }}</p>
+      {% if niche_error %}<p class="error" role="alert">{{ niche_error }}</p>{% endif %}
+      <button class="btn ghost sm" type="submit">{{ t("save", lang) }}</button>
+    </form>
+  </details>
+</section>
+{% endif %}
+
+<div id="job-panel">{% if job %}{% include "_job.html" %}{% endif %}</div>
+
+<form class="filters"
+      hx-get="/channels"
+      hx-target="#channel-list"
+      hx-swap="innerHTML"
+      hx-push-url="true"
+      hx-trigger="change, keyup changed delay:300ms">
+  <input type="hidden" name="tab" value="{{ active_tab }}">
+  <input type="search" name="q" value="{{ filters.q }}" placeholder="{{ t('filter_search', lang) }}" aria-label="{{ t('filter_search', lang) }}">
+  <select name="status" aria-label="{{ t('filter_status', lang) }}">
+    <option value="">{{ t("all_statuses", lang) }}</option>
+    {% for value in statuses %}
+      <option value="{{ value }}" {{ 'selected' if filters.status == value else '' }}>{{ label("status", value, lang) }}</option>
+    {% endfor %}
+  </select>
+  <select name="contact" aria-label="{{ t('filter_contact', lang) }}">
+    <option value="">{{ t("all_contacts", lang) }}</option>
+    {% for value in contact_statuses %}
+      <option value="{{ value }}" title="{{ label('contact_hint', value, lang) }}" {{ 'selected' if filters.contact == value else '' }}>{{ label("contact", value, lang) }}</option>
+    {% endfor %}
+  </select>
+  <select name="source" aria-label="{{ t('filter_source', lang) }}">
+    <option value="">{{ t("all_sources", lang) }}</option>
+    {% for value in sources %}
+      <option value="{{ value }}" {{ 'selected' if filters.source == value else '' }}>{{ label("source", value, lang) }}</option>
+    {% endfor %}
+  </select>
+  <select name="flag" aria-label="{{ t('filter_flag', lang) }}">
+    <option value="">{{ t("all_flags", lang) }}</option>
+    {% for value in flag_names %}
+      <option value="{{ value }}" {{ 'selected' if filters.flag == value else '' }}>{{ label("flag", value, lang) }}</option>
+    {% endfor %}
+  </select>
+  <label class="check">
+    <input type="checkbox" name="activity" value="all" {{ 'checked' if filters.activity == 'all' else '' }}>
+    <span>{{ t("filter_show_inactive", lang) }}</span>
+  </label>
+</form>
+<span id="inactive-hint" class="filter-hint">{% if inactive_hidden %}{{ t("inactive_hidden_count", lang).format(count=inactive_hidden) }}{% endif %}</span>
+
+<div class="list-actions">
+  <form id="batch-form" hx-post="/jobs/draft" hx-target="#job-panel" hx-swap="innerHTML">
+    <button class="btn ghost sm" type="submit">{{ t("generate_drafts", lang) }}</button>
+  </form>
+  {% if source_counts %}
+    <p class="source-summary">{{ t("by_source", lang) }}:
+      {% for name, count in source_counts.items() %}{{ label("source", name, lang) }} {{ count }}{% if not loop.last %} · {% endif %}{% endfor %}
+    </p>
+  {% endif %}
+</div>
+
+<div id="channel-list">
+  {% include "_list.html" %}
+</div>
+{% endblock %}

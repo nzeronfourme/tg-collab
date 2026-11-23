@@ -1,0 +1,8 @@
+<div class="card">
+  {% if result.ok %}
+    <p class="secret-state">{{ t("network_ok", lang) }}: HTTP {{ result.status }} · {{ result.ms }} ms</p>
+  {% else %}
+    <p class="error">{{ t("network_failed", lang) }}: {{ result.error }}</p>
+    <p class="muted">{{ t("proxy_hint", lang) }}</p>
+  {% endif %}
+</div>

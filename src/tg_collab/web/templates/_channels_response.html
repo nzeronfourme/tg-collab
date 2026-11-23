@@ -1,0 +1,4 @@
+{% include "_list.html" %}
+{% with oob = true %}{% include "_tab_counts.html" %}{% endwith %}
+<span id="inactive-hint" class="filter-hint" hx-swap-oob="true">{% if inactive_hidden %}{{ t("inactive_hidden_count", lang).format(count=inactive_hidden) }}{% endif %}</span>
+{% with oob = true %}{% include "_export_links.html" %}{% endwith %}

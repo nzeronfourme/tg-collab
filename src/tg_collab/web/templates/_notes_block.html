@@ -1,0 +1,6 @@
+<form hx-post="/channels/{{ channel.id }}/notes" hx-target="#notes-block" hx-swap="innerHTML">
+  <textarea name="notes" rows="6">{{ channel.notes }}</textarea>
+  <div class="toolbar">
+    <button class="btn ghost sm" type="submit">{{ t("save_notes", lang) }}</button>
+  </div>
+</form>

@@ -1,0 +1,29 @@
+{% set starting = job.status == "running" and job.progress < 25 %}
+<div class="card job" data-job-id="{{ job.id }}"
+     {% if job.status == "running" %}hx-get="/jobs/{{ job.id }}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}>
+  {% if notice %}<p class="job-notice" role="status">{{ notice }}</p>{% endif %}
+  <div class="job-head">
+    <span class="badge">{{ label("job", job.status, lang) }}</span>
+    <span class="mono muted">{{ label("job_kind", job.kind, lang) }} · {{ job.progress }}%</span>
+  </div>
+  <div class="progress{% if starting %} progress-indeterminate{% endif %}" role="progressbar"
+       aria-valuemin="0" aria-valuemax="100"{% if not starting %} aria-valuenow="{{ job.progress }}"{% endif %}>
+    <span{% if not starting %} style="width: {{ job.progress }}%"{% endif %}></span>
+  </div>
+  {% set all_failed = job.status == "error" and job.result is mapping and job.result.get("sources_ok") == 0 %}
+  {% set failed_message = t("job_all_sources_failed", lang) %}
+  <p class="job-message{% if job.status == 'running' %} job-phase{% else %} muted{% endif %}">
+    {{ failed_message if all_failed and failed_message != "job_all_sources_failed" else job.message }}
+  </p>
+  {% if job.status == "running" %}
+    <form hx-post="/jobs/{{ job.id }}/cancel" hx-target="#job-panel" hx-swap="innerHTML">
+      <button class="btn ghost sm" type="submit">{{ t("cancel", lang) }}</button>
+    </form>
+  {% endif %}
+  {% if job.result %}
+    {% include "_job_result.html" %}
+  {% endif %}
+  {% if job.log %}
+    <details><summary>{{ t("log", lang) }}</summary><pre class="log">{{ job.log }}</pre></details>
+  {% endif %}
+</div>

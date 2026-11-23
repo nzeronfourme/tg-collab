@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+basedpyright/
+
+# Build output
+dist/
+build/
+*.egg-info/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local runtime data
+.tg-collab/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+outreach.md
+outreach.csv
+.env
+*.log
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+desktop.ini

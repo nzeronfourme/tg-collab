@@ -1,0 +1,33 @@
+<div class="import-result">
+  <p class="muted">
+    {{ t("import_accepted", lang) }}: <b>{{ result.accepted }}</b> ·
+    {{ t("import_rejected", lang) }}: <b>{{ result.rejected }}</b>
+    {% if result.limited %}· {{ t("import_limited", lang) }}: {{ result.limited }}{% endif %}
+  </p>
+  {% if result.leads %}
+    <p class="muted">{{ t("import_leads", lang) }}: <b>{{ result.leads|length }}</b></p>
+    <ul class="import-list">
+      {% for row in result.leads %}
+        <li><span class="badge ok">{{ row.url }}</span>{% if row.title %}<span class="muted">{{ row.title }}</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if result.results %}
+    <ul class="import-list">
+      {% for row in result.results %}
+        <li>
+          <span class="badge {{ 'ok' if row.status == 'accepted' else 'warn' }}">@{{ row.username }}</span>
+          {% if row.reason %}<span class="muted">{{ row.reason }}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if result.problems %}
+    <ul class="import-list">
+      {% for problem in result.problems %}
+        <li><span class="muted">{{ problem.target }}: {{ problem.reason }}</span></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <div hx-get="/channels?tab={{ tab }}" hx-target="#channel-list" hx-swap="innerHTML" hx-trigger="load"></div>
+</div>

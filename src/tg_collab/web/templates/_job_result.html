@@ -1,0 +1,41 @@
+{% set status_map = job.result.get("source_status") if job.result is mapping else none %}
+{% if status_map %}
+  <p class="job-summary muted">
+    {{ t("job_summary_added", lang) }}: {{ job.result.get("added", 0) }} ·
+    {{ t("job_summary_updated", lang) }}: {{ job.result.get("updated", 0) }} ·
+    {{ t("job_summary_skipped", lang) }}: {{ job.result.get("skipped_fresh", 0) }} ·
+    {{ t("job_summary_errors", lang) }}: {{ (job.result.get("errors") or []) | length }}
+  </p>
+  <div class="table-wrap">
+    <table class="source-status">
+      <colgroup>
+        <col class="c-source">
+        <col class="c-state">
+        <col class="c-remedy">
+      </colgroup>
+      <caption>{{ t("source_status_title", lang) }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ t("col_source", lang) }}</th>
+          <th scope="col">{{ t("col_status", lang) }}</th>
+          <th scope="col">{{ t("col_remedy", lang) }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key, status in status_map.items() %}
+        <tr>
+          <td>{{ label("source", key, lang) }}</td>
+          <td><span class="badge source-status-{{ status }}">{{ label("source_status", status, lang) }}</span></td>
+          <td class="remedy">{{ t("remedy_" ~ status, lang) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif job.result is mapping %}
+  <dl class="job-result">
+    {% for key, value in job.result.items() if value is string or value is number %}
+    <dt>{{ key }}</dt><dd>{{ value }}</dd>
+    {% endfor %}
+  </dl>
+{% endif %}
